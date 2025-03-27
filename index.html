@@ -5,6 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Мой проект</title>
     <link rel="stylesheet" href="styles.css">
+    <script>
+        // Проверка статуса перед загрузкой
+        if (localStorage.getItem('siteStatus') === 'pending') {
+            window.location.href = './pending.html';
+        }
+    </script>
 </head>
 <body>
     <div class="container">
