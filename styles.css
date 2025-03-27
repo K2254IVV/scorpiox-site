@@ -1,34 +1,43 @@
 body {
     background-color: #000;
-    color: #00ff00;
+    color: #0f0;
     font-family: 'Courier New', monospace;
-    margin: 0;
-    padding: 0;
     display: flex;
     justify-content: center;
     align-items: center;
     height: 100vh;
+    margin: 0;
     overflow: hidden;
 }
 
-.container {
+.console {
     text-align: center;
     max-width: 800px;
     padding: 20px;
 }
 
-.logo {
-    color: #aa00ff;
+.ascii-art {
+    color: #9b59b6; /* Фиолетовый цвет */
     font-size: 12px;
     line-height: 1.2;
     margin-bottom: 30px;
 }
 
 .description {
-    color: #00ff00;
-    white-space: pre-wrap;
-    font-size: 16px;
-    line-height: 1.5;
-    max-width: 600px;
-    margin: 0 auto;
+    color: #0f0;
+    white-space: pre-line;
+    margin-top: 20px;
+    border-top: 1px solid #333;
+    padding-top: 20px;
+}
+
+/* Анимация мигающего курсора */
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+}
+
+.description::after {
+    content: "_";
+    animation: blink 1s step-end infinite;
 }
