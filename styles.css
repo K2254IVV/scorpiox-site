@@ -1,0 +1,41 @@
+body {
+    background-color: #000000;
+    color: #00ff00;
+    font-family: 'Courier New', monospace;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    overflow: hidden;
+}
+
+.container {
+    text-align: center;
+}
+
+.logo {
+    color: #9b59b6; /* Фиолетовый цвет */
+    font-size: 12px;
+    line-height: 1.2;
+    margin: 0;
+    white-space: pre;
+}
+
+.description {
+    margin-top: 20px;
+    font-size: 18px;
+    color: #ffffff;
+}
+
+/* Анимация мигающего курсора */
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+}
+
+.description::after {
+    content: "_";
+    animation: blink 1s step-end infinite;
+    color: #00ff00;
+}
