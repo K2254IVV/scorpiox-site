@@ -3,26 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Console Style Site</title>
+    <title>ScorpioX OS</title>
     <link rel="stylesheet" href="styles.css">
-    <script>
-        // Check status and redirect if needed
-        fetch('status.txt')
-            .then(response => response.text())
-            .then(status => {
-                status = status.trim();
-                if (status === 'pending' && !window.location.pathname.endsWith('/pending')) {
-                    window.location.href = '/pending';
-                } else if (status === 'active' && window.location.pathname.endsWith('/pending')) {
-                    window.location.href = '/';
-                }
-            })
-            .catch(() => console.log('Status check failed'));
-    </script>
 </head>
 <body>
-    <div class="container">
-        <pre class="logo">
+    <div class="console">
+        <pre class="ascii-art">
    _____                      _     __   __
   / ____|                    (_)    \ \ / /
  | (___   ___ ___  _ __ _ __  _  ___ \ V / 
@@ -32,17 +18,21 @@
                        | |                 
                        |_|                 
         </pre>
-        <div class="description" id="desc"></div>
+        <div class="description" id="description">
+            <!-- Описание будет загружено из desc.txt -->
+        </div>
     </div>
+
     <script>
-        // Load description
+        // Загрузка описания из файла
         fetch('desc.txt')
             .then(response => response.text())
             .then(text => {
-                document.getElementById('desc').textContent = text;
+                document.getElementById('description').textContent = text;
             })
-            .catch(() => {
-                document.getElementById('desc').textContent = 'Failed to load description.';
+            .catch(error => {
+                console.error('Error loading description:', error);
+                document.getElementById('description').textContent = 'Error loading description.';
             });
     </script>
 </body>
