@@ -1,53 +1,55 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const asciiLogo = document.getElementById('ascii-logo');
     const description = document.getElementById('description');
-    
-    const logoText = `
-   _____                      _     __   __
-  / ____|                    (_)    \\ \\ / /
- | (___   ___ ___  _ __ _ __  _  ___ \\ V / 
-  \\___ \\ / __/ _ \\| '__| '_ \\| |/ _ \\ > <  
-  ____) | (_| (_) | |  | |_) | | (_) / . \\ 
- |_____/ \\___\\___/|_|  | .__/|_|\\___/_/ \\_\\
-                       | |                 
-                       |_|                 
-    `.trim();
+    const downloadButton = document.getElementById('download-button');
     
     const descText = 'тест';
+    const buttonText = `
+  _____                      _                 _ 
+ |  __ \\                    | |               | |
+ | |  | | _____      ___ __ | | ___   __ _  __| |
+ | |  | |/ _ \\ \\ /\\ / | '_ \\| |/ _ \\ / _\` |/ _\` |
+ | |__| | (_) \\ V  V /| | | | | (_) | (_| | (_| |
+ |_____/ \\___/ \\_/\\_/ |_| |_|_|\\___/ \\__,_|\\__,_|
+`.trim();
     
     // Проверяем, была ли уже анимация в этой сессии
     if (!sessionStorage.getItem('animationShown')) {
-        // Если нет - запускаем анимацию
-        typeText(asciiLogo, logoText, () => {
-            typeText(description, descText, null, true);
+        // Анимация печатания описания
+        typeText(description, descText, () => {
+            // После описания показываем кнопку
+            downloadButton.textContent = buttonText;
+            addCursor(downloadButton);
+            
+            // Делаем кнопку кликабельной
+            downloadButton.addEventListener('click', () => {
+                alert('Скачивание начато!');
+                // Здесь можно добавить реальную логику скачивания
+            });
         });
+        
         sessionStorage.setItem('animationShown', 'true');
     } else {
-        // Если была - сразу показываем текст
-        asciiLogo.textContent = logoText;
+        // Если анимация уже была - показываем всё сразу
         description.textContent = descText;
-        addCursor(description);
+        downloadButton.textContent = buttonText;
+        addCursor(downloadButton);
+        
+        downloadButton.addEventListener('click', () => {
+            alert('Скачивание начато!');
+        });
     }
     
-    function typeText(element, text, callback, addCursorAfter = false) {
+    function typeText(element, text, callback) {
         let i = 0;
         const typing = setInterval(() => {
             if (i < text.length) {
-                // Для пре-элемента мы должны обрабатывать переносы строк правильно
-                if (element.tagName === 'PRE') {
-                    element.textContent = text.substring(0, i + 1);
-                } else {
-                    element.textContent = text.substring(0, i + 1);
-                }
+                element.textContent = text.substring(0, i + 1);
                 i++;
             } else {
                 clearInterval(typing);
-                if (addCursorAfter) {
-                    addCursor(element);
-                }
                 if (callback) callback();
             }
-        }, 20); // Скорость печати (меньше = быстрее)
+        }, 100); // Скорость печати (как в консоли)
     }
     
     function addCursor(element) {
