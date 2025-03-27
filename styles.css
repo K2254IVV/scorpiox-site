@@ -1,56 +1,93 @@
+/* Основные стили */
 body {
-    background-color: #000000;
+    background-color: #000;
     color: #00ff00;
     font-family: 'Courier New', monospace;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
     margin: 0;
-    overflow: hidden;
+    overflow-x: hidden;
 }
 
 .container {
-    text-align: center;
+    display: flex;
+    min-height: 100vh;
+}
+
+/* Левая часть (консоль) */
+.console-side {
+    flex: 1;
+    padding: 2rem;
+    border-right: 1px solid #333;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 }
 
 .logo {
     color: #9b59b6;
     font-size: 12px;
     line-height: 1.2;
-    margin: 0;
-    white-space: pre;
+    margin: 0 0 2rem 0;
 }
 
 #description {
-    margin: 20px 0;
-    font-size: 18px;
-    color: #ffffff;
-    min-height: 1em;
+    margin: 1rem 0;
+    font-size: 1.1rem;
 }
 
 #download-button {
-    margin-top: 30px;
-    color: #00ff00;
-    font-family: 'Courier New', monospace;
+    margin-top: 2rem;
     cursor: pointer;
-    white-space: pre;
 }
 
-#download-button:hover {
-    text-shadow: 0 0 5px #00ff00;
+/* Правая часть (инфо) */
+.info-side {
+    flex: 1;
+    padding: 2rem;
+    max-width: 500px;
+    background: #111;
+    overflow-y: auto;
 }
 
+.description-box, .screenshots-box {
+    margin-bottom: 2rem;
+    color: #fff;
+}
+
+h3 {
+    color: #9b59b6;
+    border-bottom: 1px solid #333;
+    padding-bottom: 0.5rem;
+}
+
+/* Галерея скриншотов */
+#screenshots-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.screenshot {
+    width: 100%;
+    border: 2px solid #333;
+    transition: transform 0.3s;
+    cursor: pointer;
+}
+
+.screenshot:hover {
+    transform: scale(1.05);
+    border-color: #9b59b6;
+}
+
+/* Курсор */
 .cursor {
     display: inline-block;
     width: 10px;
     height: 1em;
     background-color: #00ff00;
     animation: blink 1s step-end infinite;
-    vertical-align: bottom;
 }
 
 @keyframes blink {
-    0%, 100% { opacity: 1; }
     50% { opacity: 0; }
 }
