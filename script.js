@@ -1,59 +1,48 @@
-// ====== ГЛАВНЫЕ НАСТРОЙКИ ======
+// Конфигурация
 const CONFIG = {
-    siteStatus: 'active', // 'active' или 'pending'
     repoName: 'scorpiox-site', // название вашего репозитория
+    statusFile: '/status.txt', // путь к файлу статуса
     downloadFile: 'https://example.com/file.zip' // ссылка для скачивания
 };
 
-// ====== ОСНОВНОЙ КОД ======
-document.addEventListener('DOMContentLoaded', () => {
-    // Проверяем статус сайта
-    checkSiteStatus();
-    
-    // Если это не страница ожидания - инициализируем основной интерфейс
-    if (!window.location.pathname.includes('/pending/')) {
-        initMainInterface();
+// Основная функция
+document.addEventListener('DOMContentLoaded', async () => {
+    try {
+        const status = await checkSiteStatus();
+        
+        if (status === 'pending' && !isPendingPage()) {
+            redirectToPending();
+            return;
+        }
+
+        if (!isPendingPage()) {
+            initMainInterface();
+        }
+    } catch (error) {
+        console.error('Ошибка при проверке статуса:', error);
+        // По умолчанию показываем основной интерфейс
+        if (!isPendingPage()) initMainInterface();
     }
 });
 
-function checkSiteStatus() {
-    // Вариант 1: Проверка через hash (#pending в URL)
-    if (window.location.hash === '#pending') {
-        redirectToPending();
-        return;
-    }
+// ====== ФУНКЦИИ ПРОВЕРКИ СТАТУСА ======
+async function checkSiteStatus() {
+    const response = await fetch(`${CONFIG.statusFile}?t=${Date.now()}`); // Добавляем timestamp чтобы избежать кэширования
+    if (!response.ok) throw new Error('Файл статуса не найден');
+    const status = await response.text();
+    return status.trim().toLowerCase();
+}
 
-    // Вариант 2: Проверка через localStorage
-    const savedStatus = localStorage.getItem('siteStatus');
-    if (savedStatus === 'pending' && !window.location.pathname.includes('/pending/')) {
-        redirectToPending();
-        return;
-    }
-
-    // Вариант 3: Проверка через status.txt (для GitHub Pages)
-    fetch(`/${CONFIG.repoName}/status.txt`)
-        .then(response => {
-            if (response.ok) return response.text();
-            return 'active';
-        })
-        .then(status => {
-            if (status.trim() === 'pending' && !window.location.pathname.includes('/pending/')) {
-                redirectToPending();
-            }
-        })
-        .catch(() => console.log('Status check fallback to active'));
+function isPendingPage() {
+    return window.location.pathname.includes('/pending/');
 }
 
 function redirectToPending() {
-    if (!window.location.pathname.includes('/pending/')) {
-        window.location.href = `/${CONFIG.repoName}/pending/`;
-    }
+    window.location.href = `/${CONFIG.repoName}/pending/`;
 }
 
+// ====== ОСНОВНОЙ ИНТЕРФЕЙС ======
 function initMainInterface() {
-    // Устанавливаем статус активным при загрузке
-    localStorage.setItem('siteStatus', 'active');
-
     const description = document.getElementById('description');
     const downloadButton = document.getElementById('download-button');
     
@@ -67,7 +56,7 @@ function initMainInterface() {
  |_____/ \\___/ \\_/\\_/ |_| |_|_|\\___/ \\__,_|\\__,_|
 `.trim();
 
-    // Анимация печатающегося текста
+    // Анимация печати
     if (!sessionStorage.getItem('animationShown')) {
         typeWriter(description, descText, () => {
             showDownloadButton(downloadButton, buttonText);
@@ -79,7 +68,7 @@ function initMainInterface() {
     }
 }
 
-// ====== АНИМАЦИИ И ЭФФЕКТЫ ======
+// ====== АНИМАЦИИ ======
 function typeWriter(element, text, onComplete) {
     let i = 0;
     element.innerHTML = '';
@@ -92,26 +81,25 @@ function typeWriter(element, text, onComplete) {
             clearInterval(typing);
             if (onComplete) onComplete();
         }
-    }, 50); // Скорость печати
+    }, 50);
 }
 
 function showDownloadButton(element, text) {
     element.innerHTML = text;
     addCursor(element);
     
-    // Стили при наведении
+    element.style.cursor = 'pointer';
     element.style.transition = 'all 0.3s';
+    
     element.addEventListener('mouseenter', () => {
         element.style.textShadow = '0 0 10px #00ff00';
     });
+    
     element.addEventListener('mouseleave', () => {
         element.style.textShadow = 'none';
     });
     
-    // Клик по кнопке
-    element.addEventListener('click', () => {
-        startDownload();
-    });
+    element.addEventListener('click', startDownload);
 }
 
 function addCursor(element) {
@@ -120,40 +108,13 @@ function addCursor(element) {
     element.appendChild(cursor);
 }
 
-// ====== ЛОГИКА СКАЧИВАНИЯ ======
+// ====== СКАЧИВАНИЕ ======
 function startDownload() {
-    // 1. Анимация нажатия кнопки
-    const button = document.getElementById('download-button');
-    button.style.transform = 'scale(0.95)';
-    button.style.color = '#55ff55';
-    
-    setTimeout(() => {
-        button.style.transform = 'scale(1)';
-    }, 200);
-    
-    // 2. Запуск скачивания
-    setTimeout(() => {
-        const link = document.createElement('a');
-        link.href = CONFIG.downloadFile;
-        link.download = CONFIG.downloadFile.split('/').pop();
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        
-        // 3. Сообщение о успешном скачивании
-        button.innerHTML = 'Скачивание началось!';
-        setTimeout(() => {
-            button.innerHTML = buttonText;
-            addCursor(button);
-        }, 2000);
-    }, 300);
+    const link = document.createElement('a');
+    link.href = CONFIG.downloadFile;
+    link.download = CONFIG.downloadFile.split('/').pop();
+    link.style.display = 'none';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
 }
-
-// ====== ДЛЯ АДМИНИСТРИРОВАНИЯ ======
-// Чтобы перевести сайт в режим ожидания, выполните в консоли:
-// localStorage.setItem('siteStatus', 'pending');
-// window.location.href = '/scorpiox-site/pending/';
-
-// Чтобы вернуть в рабочее состояние:
-// localStorage.setItem('siteStatus', 'active');
-// window.location.reload();
