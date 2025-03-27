@@ -1,10 +1,24 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ScorpioX Project</title>
+    <title>Console Style Site</title>
     <link rel="stylesheet" href="styles.css">
+    <script>
+        // Check status and redirect if needed
+        fetch('status.txt')
+            .then(response => response.text())
+            .then(status => {
+                status = status.trim();
+                if (status === 'pending' && !window.location.pathname.endsWith('/pending')) {
+                    window.location.href = '/pending';
+                } else if (status === 'active' && window.location.pathname.endsWith('/pending')) {
+                    window.location.href = '/';
+                }
+            })
+            .catch(() => console.log('Status check failed'));
+    </script>
 </head>
 <body>
     <div class="container">
@@ -18,9 +32,18 @@
                        | |                 
                        |_|                 
         </pre>
-        <div id="description"></div>
-        <!-- Описание загрузится сюда -->
+        <div class="description" id="desc"></div>
     </div>
-    <script src="script.js"></script>
+    <script>
+        // Load description
+        fetch('desc.txt')
+            .then(response => response.text())
+            .then(text => {
+                document.getElementById('desc').textContent = text;
+            })
+            .catch(() => {
+                document.getElementById('desc').textContent = 'Failed to load description.';
+            });
+    </script>
 </body>
 </html>
