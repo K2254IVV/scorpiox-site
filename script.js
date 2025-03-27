@@ -1,52 +1,40 @@
 // Конфигурация
 const CONFIG = {
-    repoName: 'scorpiox-site', // название вашего репозитория
-    statusFile: '/status.txt', // путь к файлу статуса
-    downloadFile: 'https://example.com/file.zip' // ссылка для скачивания
+    repoName: 'scorpiox-site',
+    descriptionFile: 'desc.txt',
+    screenshotsFile: 'screenshots.txt',
+    downloadFile: 'https://example.com/download.zip'
 };
 
-// Основная функция
-document.addEventListener('DOMContentLoaded', async () => {
-    try {
-        const status = await checkSiteStatus();
-        
-        if (status === 'pending' && !isPendingPage()) {
-            redirectToPending();
-            return;
-        }
-
-        if (!isPendingPage()) {
-            initMainInterface();
-        }
-    } catch (error) {
-        console.error('Ошибка при проверке статуса:', error);
-        // По умолчанию показываем основной интерфейс
-        if (!isPendingPage()) initMainInterface();
+// Главная функция
+(async function() {
+    // Проверка статуса
+    if (await checkStatus() === 'pending') {
+        window.location.href = '/pending/';
+        return;
     }
-});
 
-// ====== ФУНКЦИИ ПРОВЕРКИ СТАТУСА ======
-async function checkSiteStatus() {
-    const response = await fetch(`${CONFIG.statusFile}?t=${Date.now()}`); // Добавляем timestamp чтобы избежать кэширования
-    if (!response.ok) throw new Error('Файл статуса не найден');
-    const status = await response.text();
-    return status.trim().toLowerCase();
+    // Инициализация основной страницы
+    initConsole();
+    loadProjectInfo();
+})();
+
+// Проверка статуса
+async function checkStatus() {
+    try {
+        const response = await fetch(`/status.txt?t=${Date.now()}`);
+        return (await response.text()).trim();
+    } catch {
+        return 'active'; // По умолчанию
+    }
 }
 
-function isPendingPage() {
-    return window.location.pathname.includes('/pending/');
-}
-
-function redirectToPending() {
-    window.location.href = `/${CONFIG.repoName}/pending/`;
-}
-
-// ====== ОСНОВНОЙ ИНТЕРФЕЙС ======
-function initMainInterface() {
+// Консольная часть
+function initConsole() {
     const description = document.getElementById('description');
     const downloadButton = document.getElementById('download-button');
     
-    const descText = 'Добро пожаловать в ScorpioX';
+    const consoleText = 'Добро пожаловать в ScorpioX';
     const buttonText = `
   _____                      _                 _ 
  |  __ \\                    | |               | |
@@ -54,52 +42,56 @@ function initMainInterface() {
  | |  | |/ _ \\ \\ /\\ / | '_ \\| |/ _ \\ / _\` |/ _\` |
  | |__| | (_) \\ V  V /| | | | | (_) | (_| | (_| |
  |_____/ \\___/ \\_/\\_/ |_| |_|_|\\___/ \\__,_|\\__,_|
-`.trim();
+    `.trim();
 
-    // Анимация печати
-    if (!sessionStorage.getItem('animationShown')) {
-        typeWriter(description, descText, () => {
-            showDownloadButton(downloadButton, buttonText);
+    typeText(description, consoleText, () => {
+        downloadButton.innerHTML = buttonText;
+        addCursor(downloadButton);
+        setupDownloadButton(downloadButton);
+    });
+}
+
+// Загрузка описания и скриншотов
+async function loadProjectInfo() {
+    try {
+        // Загрузка описания
+        const descResponse = await fetch(CONFIG.descriptionFile);
+        const description = await descResponse.text();
+        document.getElementById('project-description').textContent = description;
+
+        // Загрузка скриншотов
+        const screensResponse = await fetch(CONFIG.screenshotsFile);
+        const screenshots = (await screensResponse.text())
+            .split('\n')
+            .filter(path => path.trim() !== '');
+
+        const container = document.getElementById('screenshots-container');
+        screenshots.forEach(path => {
+            const img = document.createElement('img');
+            img.src = path.trim();
+            img.className = 'screenshot';
+            img.alt = 'Скриншот проекта';
+            container.appendChild(img);
         });
-        sessionStorage.setItem('animationShown', 'true');
-    } else {
-        description.textContent = descText;
-        showDownloadButton(downloadButton, buttonText);
+
+    } catch (error) {
+        console.error('Ошибка загрузки информации:', error);
     }
 }
 
-// ====== АНИМАЦИИ ======
-function typeWriter(element, text, onComplete) {
+// Вспомогательные функции
+function typeText(element, text, callback) {
     let i = 0;
     element.innerHTML = '';
     
-    const typing = setInterval(() => {
+    const timer = setInterval(() => {
         if (i < text.length) {
-            element.innerHTML += text.charAt(i);
-            i++;
+            element.innerHTML += text[i++];
         } else {
-            clearInterval(typing);
-            if (onComplete) onComplete();
+            clearInterval(timer);
+            callback?.();
         }
     }, 50);
-}
-
-function showDownloadButton(element, text) {
-    element.innerHTML = text;
-    addCursor(element);
-    
-    element.style.cursor = 'pointer';
-    element.style.transition = 'all 0.3s';
-    
-    element.addEventListener('mouseenter', () => {
-        element.style.textShadow = '0 0 10px #00ff00';
-    });
-    
-    element.addEventListener('mouseleave', () => {
-        element.style.textShadow = 'none';
-    });
-    
-    element.addEventListener('click', startDownload);
 }
 
 function addCursor(element) {
@@ -108,13 +100,12 @@ function addCursor(element) {
     element.appendChild(cursor);
 }
 
-// ====== СКАЧИВАНИЕ ======
-function startDownload() {
-    const link = document.createElement('a');
-    link.href = CONFIG.downloadFile;
-    link.download = CONFIG.downloadFile.split('/').pop();
-    link.style.display = 'none';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+function setupDownloadButton(button) {
+    button.style.cursor = 'pointer';
+    button.addEventListener('click', () => {
+        const link = document.createElement('a');
+        link.href = CONFIG.downloadFile;
+        link.download = CONFIG.downloadFile.split('/').pop();
+        link.click();
+    });
 }
