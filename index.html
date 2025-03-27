@@ -3,18 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Мой проект</title>
+    <title>ScorpioX Project</title>
     <link rel="stylesheet" href="styles.css">
-    <script>
-        // Проверка статуса перед загрузкой
-        if (localStorage.getItem('siteStatus') === 'pending') {
-            window.location.href = './pending.html';
-        }
-    </script>
 </head>
 <body>
     <div class="container">
-        <pre class="logo">
+        <!-- Левая часть (консоль) -->
+        <div class="console-side">
+            <pre class="logo">
    _____                      _     __   __
   / ____|                    (_)    \ \ / /
  | (___   ___ ___  _ __ _ __  _  ___ \ V / 
@@ -23,10 +19,25 @@
  |_____/ \___\___/|_|  | .__/|_|\___/_/ \_\
                        | |                 
                        |_|                 
-        </pre>
-        <div id="description"></div>
-        <div id="download-button"></div>
+            </pre>
+            <div id="description"></div>
+            <div id="download-button"></div>
+        </div>
+
+        <!-- Правая часть (описание и скриншоты) -->
+        <div class="info-side">
+            <div class="description-box">
+                <h3>О ПРОЕКТЕ</h3>
+                <div id="project-description"></div>
+            </div>
+            
+            <div class="screenshots-box">
+                <h3>СКРИНШОТЫ</h3>
+                <div id="screenshots-container"></div>
+            </div>
+        </div>
     </div>
+
     <script src="script.js"></script>
 </body>
 </html>
