@@ -14,7 +14,7 @@ body {
     text-align: center;
 }
 
-#ascii-logo {
+.logo {
     color: #9b59b6;
     font-size: 12px;
     line-height: 1.2;
@@ -23,10 +23,22 @@ body {
 }
 
 #description {
-    margin-top: 20px;
+    margin: 20px 0;
     font-size: 18px;
     color: #ffffff;
     min-height: 1em;
+}
+
+#download-button {
+    margin-top: 30px;
+    color: #00ff00;
+    font-family: 'Courier New', monospace;
+    cursor: pointer;
+    white-space: pre;
+}
+
+#download-button:hover {
+    text-shadow: 0 0 5px #00ff00;
 }
 
 .cursor {
