@@ -1,111 +1,71 @@
-// Конфигурация
+// Конфигурация (ОБЯЗАТЕЛЬНО ПРОВЕРЬТЕ URL!)
 const CONFIG = {
-    repoName: 'scorpiox-site',
-    descriptionFile: 'desc.txt',
-    screenshotsFile: 'screenshots.txt',
-    downloadFile: 'https://example.com/download.zip'
+    statusUrl: 'https://k2254ivv.github.io/scorpiox-site/status.txt',
+    descUrl: 'https://k2254ivv.github.io/scorpiox-site/desc.txt',
+    repoName: 'scorpiox-site'
 };
 
 // Главная функция
 (async function() {
-    // Проверка статуса
-    if (await checkStatus() === 'pending') {
-        window.location.href = '/pending/';
-        return;
-    }
+    try {
+        // 1. Проверка статуса
+        const status = await fetchText(CONFIG.statusUrl);
+        
+        if (status === 'pending') {
+            window.location.href = `/${CONFIG.repoName}/pending/`;
+            return;
+        }
 
-    // Инициализация основной страницы
-    initConsole();
-    loadProjectInfo();
+        // 2. Инициализация основной страницы
+        await initMainPage();
+        
+    } catch (error) {
+        console.error('Ошибка:', error);
+        // Фолбэк если что-то пошло не так
+        document.getElementById('description').textContent = 'Добро пожаловать в ScorpioX (оффлайн-режим)';
+    }
 })();
 
-// Проверка статуса
-async function checkStatus() {
-    try {
-        const response = await fetch(`/status.txt?t=${Date.now()}`);
-        return (await response.text()).trim();
-    } catch {
-        return 'active'; // По умолчанию
-    }
-}
-
-// Консольная часть
-function initConsole() {
+// ====== ОСНОВНЫЕ ФУНКЦИИ ======
+async function initMainPage() {
     const description = document.getElementById('description');
-    const downloadButton = document.getElementById('download-button');
     
-    const consoleText = 'Добро пожаловать в ScorpioX';
-    const buttonText = `
-  _____                      _                 _ 
- |  __ \\                    | |               | |
- | |  | | _____      ___ __ | | ___   __ _  __| |
- | |  | |/ _ \\ \\ /\\ / | '_ \\| |/ _ \\ / _\` |/ _\` |
- | |__| | (_) \\ V  V /| | | | | (_) | (_| | (_| |
- |_____/ \\___/ \\_/\\_/ |_| |_|_|\\___/ \\__,_|\\__,_|
-    `.trim();
+    // 1. Печатаем приветствие
+    await typeText(description, 'Добро пожаловать в ScorpioX');
+    
+    // 2. Загружаем и печатаем описание
+    const descText = await fetchText(CONFIG.descUrl);
+    await typeText(description, '\n\n' + descText);
+    
+    // 3. Добавляем мигающий курсор
+    addCursor(description);
+}
 
-    typeText(description, consoleText, () => {
-        downloadButton.innerHTML = buttonText;
-        addCursor(downloadButton);
-        setupDownloadButton(downloadButton);
+// ====== УТИЛИТЫ ======
+async function fetchText(url) {
+    const response = await fetch(`${url}?t=${Date.now()}`);
+    if (!response.ok) throw new Error(`Ошибка загрузки: ${url}`);
+    return await response.text();
+}
+
+function typeText(element, text) {
+    return new Promise(resolve => {
+        let i = 0;
+        element.textContent = '';
+        
+        const timer = setInterval(() => {
+            if (i < text.length) {
+                element.textContent += text[i++];
+            } else {
+                clearInterval(timer);
+                resolve();
+            }
+        }, 50); // Скорость печати
     });
-}
-
-// Загрузка описания и скриншотов
-async function loadProjectInfo() {
-    try {
-        // Загрузка описания
-        const descResponse = await fetch(CONFIG.descriptionFile);
-        const description = await descResponse.text();
-        document.getElementById('project-description').textContent = description;
-
-        // Загрузка скриншотов
-        const screensResponse = await fetch(CONFIG.screenshotsFile);
-        const screenshots = (await screensResponse.text())
-            .split('\n')
-            .filter(path => path.trim() !== '');
-
-        const container = document.getElementById('screenshots-container');
-        screenshots.forEach(path => {
-            const img = document.createElement('img');
-            img.src = path.trim();
-            img.className = 'screenshot';
-            img.alt = 'Скриншот проекта';
-            container.appendChild(img);
-        });
-
-    } catch (error) {
-        console.error('Ошибка загрузки информации:', error);
-    }
-}
-
-// Вспомогательные функции
-function typeText(element, text, callback) {
-    let i = 0;
-    element.innerHTML = '';
-    
-    const timer = setInterval(() => {
-        if (i < text.length) {
-            element.innerHTML += text[i++];
-        } else {
-            clearInterval(timer);
-            callback?.();
-        }
-    }, 50);
 }
 
 function addCursor(element) {
     const cursor = document.createElement('span');
     cursor.className = 'cursor';
     element.appendChild(cursor);
-}
-
-function setupDownloadButton(button) {
-    button.style.cursor = 'pointer';
-    button.addEventListener('click', () => {
-        const link = document.createElement('a');
-        link.href = CONFIG.downloadFile;
-        link.download = CONFIG.downloadFile.split('/').pop();
-        link.click();
-    });
 }
